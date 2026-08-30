@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ms">
 
@@ -23,7 +22,6 @@ body {
 }
 
 body {
-
     background:
         radial-gradient(
             circle at center,
@@ -41,12 +39,11 @@ body {
 }
 
 
-/* ==========================================
-   TAJUK
-========================================== */
+/* =========================
+   TITLE
+========================= */
 
 h1 {
-
     position: relative;
 
     margin:
@@ -78,12 +75,11 @@ h1 {
 }
 
 
-/* ==========================================
-   JALUR GEMILANG
-========================================== */
+/* =========================
+   FLAG
+========================= */
 
 .flag {
-
     position: relative;
 
     display: block;
@@ -96,8 +92,7 @@ h1 {
 
     height: auto;
 
-    margin:
-        0 auto;
+    margin: 0 auto;
 
     z-index: 10;
 
@@ -105,29 +100,18 @@ h1 {
 
     box-shadow:
         0 0 25px
-        rgba(
-            255,
-            255,
-            255,
-            .25
-        ),
+        rgba(255,255,255,.25),
 
         0 0 60px
-        rgba(
-            255,
-            0,
-            0,
-            .25
-        );
+        rgba(255,0,0,.25);
 }
 
 
-/* ==========================================
-   SCUBA GIF
-========================================== */
+/* =========================
+   SCUBA
+========================= */
 
 .scuba {
-
     position: fixed;
 
     width: 100px;
@@ -141,10 +125,6 @@ h1 {
     user-select: none;
 }
 
-
-/* ==========================================
-   SCUBA POSITIONS
-========================================== */
 
 .scuba-1 {
     left: 4%;
@@ -195,12 +175,11 @@ h1 {
 }
 
 
-/* ==========================================
+/* =========================
    FIREWORK CANVAS
-========================================== */
+========================= */
 
 #fireworks {
-
     position: fixed;
 
     inset: 0;
@@ -216,12 +195,11 @@ h1 {
 }
 
 
-/* ==========================================
+/* =========================
    HINT
-========================================== */
+========================= */
 
 .hint {
-
     position: relative;
 
     margin-top: 18px;
@@ -236,13 +214,7 @@ h1 {
 }
 
 
-/* ==========================================
-   MOBILE
-========================================== */
-
-@media (
-    max-width: 600px
-) {
+@media (max-width: 600px) {
 
     h1 {
         margin-top: 25px;
@@ -266,19 +238,11 @@ h1 {
 <body>
 
 
-<!-- ==========================================
-     TAJUK
-========================================== -->
-
 <h1>
     SELAMAT MENYAMBUT<br>
     HARI KEBANGSAAN KE-69
 </h1>
 
-
-<!-- ==========================================
-     JALUR GEMILANG
-========================================== -->
 
 <img
     class="flag"
@@ -287,71 +251,20 @@ h1 {
 >
 
 
-<!-- ==========================================
-     SCUBA GIF
-========================================== -->
+<img class="scuba scuba-1" src="./scuba.gif" alt="">
+<img class="scuba scuba-2" src="./scuba.gif" alt="">
+<img class="scuba scuba-3" src="./scuba.gif" alt="">
+<img class="scuba scuba-4" src="./scuba.gif" alt="">
+<img class="scuba scuba-5" src="./scuba.gif" alt="">
+<img class="scuba scuba-6" src="./scuba.gif" alt="">
+<img class="scuba scuba-7" src="./scuba.gif" alt="">
+<img class="scuba scuba-8" src="./scuba.gif" alt="">
 
-<img
-    class="scuba scuba-1"
-    src="./scuba.gif"
-    alt=""
->
-
-<img
-    class="scuba scuba-2"
-    src="./scuba.gif"
-    alt=""
->
-
-<img
-    class="scuba scuba-3"
-    src="./scuba.gif"
-    alt=""
->
-
-<img
-    class="scuba scuba-4"
-    src="./scuba.gif"
-    alt=""
->
-
-<img
-    class="scuba scuba-5"
-    src="./scuba.gif"
-    alt=""
->
-
-<img
-    class="scuba scuba-6"
-    src="./scuba.gif"
-    alt=""
->
-
-<img
-    class="scuba scuba-7"
-    src="./scuba.gif"
-    alt=""
->
-
-<img
-    class="scuba scuba-8"
-    src="./scuba.gif"
-    alt=""
->
-
-
-<!-- ==========================================
-     HINT
-========================================== -->
 
 <div class="hint">
     🎆 Klik mana-mana untuk bunga api 🎆
 </div>
 
-
-<!-- ==========================================
-     FIREWORK CANVAS
-========================================== -->
 
 <canvas id="fireworks"></canvas>
 
@@ -359,19 +272,16 @@ h1 {
 <script>
 
 
-/* ==========================================
-   AUDIO SYSTEM
-========================================== */
+/* =====================================================
+   AUDIO ENGINE
+===================================================== */
 
 let audioContext = null;
 
 
-/*
-   Create audio context after
-   the first user click.
-*/
+/* Get audio context */
 
-function getAudioContext() {
+function getAudio() {
 
     if (!audioContext) {
 
@@ -383,31 +293,323 @@ function getAudioContext() {
 
     }
 
+    if (
+        audioContext.state ===
+        "suspended"
+    ) {
+
+        audioContext.resume();
+
+    }
+
     return audioContext;
 }
 
 
-/* ==========================================
-   FIREWORK LAUNCH SOUND
-========================================== */
+/* =====================================================
+   REALISTIC FIREWORK BOOM
+===================================================== */
 
-function playLaunchSound() {
+function explosionSound() {
 
     const audio =
-        getAudioContext();
-
+        getAudio();
 
     const now =
         audio.currentTime;
 
 
+    /* ---------------------------------
+       LOW FREQUENCY BOOM
+    --------------------------------- */
+
+    const boom =
+        audio.createOscillator();
+
+    const boomGain =
+        audio.createGain();
+
+
+    boom.type =
+        "sine";
+
+
+    const pitch =
+        45 +
+        Math.random() * 25;
+
+
+    boom.frequency.setValueAtTime(
+        pitch,
+        now
+    );
+
+
+    boom.frequency.exponentialRampToValueAtTime(
+        22,
+        now + 0.65
+    );
+
+
+    boomGain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    boomGain.gain.exponentialRampToValueAtTime(
+        0.7,
+        now + 0.015
+    );
+
+
+    boomGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.65
+    );
+
+
+    boom.connect(
+        boomGain
+    );
+
+    boomGain.connect(
+        audio.destination
+    );
+
+
+    boom.start(now);
+
+    boom.stop(
+        now + 0.7
+    );
+
+
+    /* ---------------------------------
+       EXPLOSION IMPACT
+    --------------------------------- */
+
+    const impact =
+        audio.createOscillator();
+
+    const impactGain =
+        audio.createGain();
+
+
+    impact.type =
+        "triangle";
+
+
+    impact.frequency.setValueAtTime(
+        110,
+        now
+    );
+
+
+    impact.frequency.exponentialRampToValueAtTime(
+        40,
+        now + 0.25
+    );
+
+
+    impactGain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    impactGain.gain.exponentialRampToValueAtTime(
+        0.35,
+        now + 0.01
+    );
+
+
+    impactGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.3
+    );
+
+
+    impact.connect(
+        impactGain
+    );
+
+    impactGain.connect(
+        audio.destination
+    );
+
+
+    impact.start(now);
+
+    impact.stop(
+        now + 0.35
+    );
+
+
+    /* ---------------------------------
+       CRACKLE NOISE
+    --------------------------------- */
+
+    const duration =
+        0.8;
+
+
+    const buffer =
+        audio.createBuffer(
+            1,
+            audio.sampleRate * duration,
+            audio.sampleRate
+        );
+
+
+    const data =
+        buffer.getChannelData(0);
+
+
     /*
-       Oscillator = rising rocket sound
+       Mostly silence with random
+       short crackles.
     */
+
+    for (
+        let i = 0;
+
+        i < data.length;
+
+        i++
+    ) {
+
+        data[i] = 0;
+
+    }
+
+
+    const crackleCount =
+        35 +
+        Math.floor(
+            Math.random() * 30
+        );
+
+
+    for (
+        let i = 0;
+
+        i < crackleCount;
+
+        i++
+    ) {
+
+        const start =
+            Math.floor(
+                Math.random()
+                *
+                data.length
+            );
+
+
+        const length =
+            Math.floor(
+                audio.sampleRate
+                *
+                (
+                    0.003 +
+                    Math.random()
+                    * 0.012
+                )
+            );
+
+
+        const amplitude =
+            0.25 +
+            Math.random()
+            * 0.65;
+
+
+        for (
+            let j = 0;
+
+            j < length &&
+            start + j <
+            data.length;
+
+            j++
+        ) {
+
+            /*
+               Short noise burst
+            */
+
+            const fade =
+                1 -
+                j / length;
+
+
+            data[start + j] =
+                (
+                    Math.random()
+                    * 2 - 1
+                )
+                *
+                amplitude
+                *
+                fade;
+
+        }
+
+    }
+
+
+    const crackle =
+        audio.createBufferSource();
+
+
+    crackle.buffer =
+        buffer;
+
+
+    const crackleGain =
+        audio.createGain();
+
+
+    crackleGain.gain.value =
+        0.35;
+
+
+    crackle.connect(
+        crackleGain
+    );
+
+    crackleGain.connect(
+        audio.destination
+    );
+
+
+    crackle.start(
+        now
+    );
+
+}
+
+
+/* =====================================================
+   ROCKET WHOOSH
+===================================================== */
+
+function launchSound() {
+
+    const audio =
+        getAudio();
+
+    const now =
+        audio.currentTime;
+
+
+    /* ---------------------------------
+       WHOOSH OSCILLATOR
+    --------------------------------- */
 
     const oscillator =
         audio.createOscillator();
-
 
     const gain =
         audio.createGain();
@@ -417,95 +619,24 @@ function playLaunchSound() {
         "sawtooth";
 
 
+    const startPitch =
+        80 +
+        Math.random() * 40;
+
+
+    const endPitch =
+        500 +
+        Math.random() * 250;
+
+
     oscillator.frequency.setValueAtTime(
-        130,
+        startPitch,
         now
     );
 
 
     oscillator.frequency.exponentialRampToValueAtTime(
-        650,
-        now + 0.35
-    );
-
-
-    gain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.12,
-        now + 0.05
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.4
-    );
-
-
-    oscillator.connect(
-        gain
-    );
-
-
-    gain.connect(
-        audio.destination
-    );
-
-
-    oscillator.start(
-        now
-    );
-
-
-    oscillator.stop(
-        now + 0.4
-    );
-}
-
-
-/* ==========================================
-   FIREWORK EXPLOSION SOUND
-========================================== */
-
-function playExplosionSound() {
-
-    const audio =
-        getAudioContext();
-
-
-    const now =
-        audio.currentTime;
-
-
-    /*
-       Low boom
-    */
-
-    const oscillator =
-        audio.createOscillator();
-
-
-    const gain =
-        audio.createGain();
-
-
-    oscillator.type =
-        "sine";
-
-
-    oscillator.frequency.setValueAtTime(
-        90,
-        now
-    );
-
-
-    oscillator.frequency.exponentialRampToValueAtTime(
-        35,
+        endPitch,
         now + 0.45
     );
 
@@ -517,14 +648,14 @@ function playExplosionSound() {
 
 
     gain.gain.exponentialRampToValueAtTime(
-        0.35,
-        now + 0.015
+        0.08,
+        now + 0.08
     );
 
 
     gain.gain.exponentialRampToValueAtTime(
         0.0001,
-        now + 0.5
+        now + 0.45
     );
 
 
@@ -532,34 +663,26 @@ function playExplosionSound() {
         gain
     );
 
-
     gain.connect(
         audio.destination
     );
 
 
-    oscillator.start(
-        now
-    );
-
+    oscillator.start(now);
 
     oscillator.stop(
-        now + 0.5
+        now + 0.45
     );
 
 
-    /*
-       Crackle/noise layer
-    */
-
-    const bufferSize =
-        audio.sampleRate * 0.35;
-
+    /* ---------------------------------
+       AIR NOISE
+    --------------------------------- */
 
     const buffer =
         audio.createBuffer(
             1,
-            bufferSize,
+            audio.sampleRate * 0.45,
             audio.sampleRate
         );
 
@@ -570,12 +693,17 @@ function playExplosionSound() {
 
     for (
         let i = 0;
-        i < bufferSize;
+
+        i < data.length;
+
         i++
     ) {
 
         data[i] =
-            Math.random() * 2 - 1;
+            (
+                Math.random()
+                * 2 - 1
+            );
 
     }
 
@@ -588,42 +716,62 @@ function playExplosionSound() {
         buffer;
 
 
+    const filter =
+        audio.createBiquadFilter();
+
+
+    filter.type =
+        "lowpass";
+
+
+    filter.frequency.setValueAtTime(
+        500,
+        now
+    );
+
+
+    filter.frequency.exponentialRampToValueAtTime(
+        2500,
+        now + 0.4
+    );
+
+
     const noiseGain =
         audio.createGain();
 
 
     noiseGain.gain.setValueAtTime(
-        0.18,
+        0.0001,
         now
     );
 
 
     noiseGain.gain.exponentialRampToValueAtTime(
+        0.05,
+        now + 0.1
+    );
+
+
+    noiseGain.gain.exponentialRampToValueAtTime(
         0.0001,
-        now + 0.35
+        now + 0.45
     );
 
 
-    noise.connect(
-        noiseGain
-    );
+    noise
+        .connect(filter)
+        .connect(noiseGain)
+        .connect(audio.destination);
 
 
-    noiseGain.connect(
-        audio.destination
-    );
-
-
-    noise.start(
-        now
-    );
+    noise.start(now);
 
 }
 
 
-/* ==========================================
+/* =====================================================
    CANVAS
-========================================== */
+===================================================== */
 
 const canvas =
     document.getElementById(
@@ -671,9 +819,9 @@ window.addEventListener(
 );
 
 
-/* ==========================================
+/* =====================================================
    FIREWORK DATA
-========================================== */
+===================================================== */
 
 const rockets = [];
 
@@ -683,23 +831,18 @@ const particles = [];
 const colors = [
 
     "#ff0000",
-
     "#ffffff",
-
     "#ffd700",
-
     "#0066ff",
-
     "#ff4d6d",
-
     "#66b7ff"
 
 ];
 
 
-/* ==========================================
+/* =====================================================
    ROCKET
-========================================== */
+===================================================== */
 
 class Rocket {
 
@@ -739,11 +882,9 @@ class Rocket {
 
         this.trail.push({
 
-            x:
-                this.x,
+            x: this.x,
 
-            y:
-                this.y
+            y: this.y
 
         });
 
@@ -779,10 +920,6 @@ class Rocket {
 
 
     draw() {
-
-        /*
-           Rocket trail
-        */
 
         for (
             let i = 0;
@@ -833,10 +970,6 @@ class Rocket {
         }
 
 
-        /*
-           Rocket
-        */
-
         ctx.beginPath();
 
 
@@ -879,10 +1012,10 @@ class Rocket {
     explode() {
 
         /*
-           SOUND
+           Play boom
         */
 
-        playExplosionSound();
+        explosionSound();
 
 
         /*
@@ -907,8 +1040,7 @@ class Rocket {
 
             const speed =
                 2 +
-                Math.random()
-                * 7;
+                Math.random() * 7;
 
 
             particles.push(
@@ -935,7 +1067,7 @@ class Rocket {
 
 
         /*
-           White ring
+           White sparkle ring
         */
 
         for (
@@ -983,9 +1115,9 @@ class Rocket {
 }
 
 
-/* ==========================================
+/* =====================================================
    PARTICLE
-========================================== */
+===================================================== */
 
 class Particle {
 
@@ -1017,8 +1149,7 @@ class Particle {
 
         this.size =
             1 +
-            Math.random()
-            * 2;
+            Math.random() * 2;
 
         this.gravity =
             0.065;
@@ -1110,14 +1241,14 @@ class Particle {
 }
 
 
-/* ==========================================
-   ANIMATION LOOP
-========================================== */
+/* =====================================================
+   ANIMATION
+===================================================== */
 
 function animate() {
 
     /*
-       Transparent canvas
+       Transparent canvas.
     */
 
     ctx.clearRect(
@@ -1156,11 +1287,8 @@ function animate() {
         ) {
 
             rockets.splice(
-
                 i,
-
                 1
-
             );
 
         }
@@ -1191,11 +1319,8 @@ function animate() {
         ) {
 
             particles.splice(
-
                 i,
-
                 1
-
             );
 
         }
@@ -1213,9 +1338,9 @@ function animate() {
 animate();
 
 
-/* ==========================================
-   CLICK → FIREWORK + SOUND
-========================================== */
+/* =====================================================
+   CLICK
+===================================================== */
 
 canvas.addEventListener(
 
@@ -1224,32 +1349,21 @@ canvas.addEventListener(
     function(event) {
 
         /*
-           Start audio
+           Start browser audio.
         */
 
-        const audio =
-            getAudioContext();
-
-
-        if (
-            audio.state ===
-            "suspended"
-        ) {
-
-            audio.resume();
-
-        }
+        getAudio();
 
 
         /*
-           Rocket sound
+           Rocket whoosh.
         */
 
-        playLaunchSound();
+        launchSound();
 
 
         /*
-           Target position
+           Firework target.
         */
 
         let targetY =
@@ -1268,7 +1382,7 @@ canvas.addEventListener(
 
 
         /*
-           Create rocket
+           Create rocket.
         */
 
         rockets.push(
@@ -1292,4 +1406,4 @@ canvas.addEventListener(
 </body>
 
 </html>
-```
+
