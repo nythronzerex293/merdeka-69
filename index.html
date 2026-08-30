@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ms">
 
@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Merdeka 69</title>
+<title>Hari Kebangsaan 69</title>
 
 <style>
 
@@ -75,7 +75,6 @@ h1 {
         0 0 45px #ffd700;
 
     z-index: 10;
-
 }
 
 
@@ -148,82 +147,51 @@ h1 {
 ========================================== */
 
 .scuba-1 {
-
     left: 4%;
     top: 12%;
-
-    transform:
-        rotate(-18deg);
+    transform: rotate(-18deg);
 }
-
 
 .scuba-2 {
-
     right: 5%;
     top: 16%;
-
-    transform:
-        rotate(20deg);
+    transform: rotate(20deg);
 }
-
 
 .scuba-3 {
-
     left: 7%;
     bottom: 15%;
-
-    transform:
-        rotate(35deg);
+    transform: rotate(35deg);
 }
-
 
 .scuba-4 {
-
     right: 7%;
     bottom: 13%;
-
-    transform:
-        rotate(-30deg);
+    transform: rotate(-30deg);
 }
-
 
 .scuba-5 {
-
     left: 18%;
     top: 38%;
-
-    transform:
-        rotate(12deg);
+    transform: rotate(12deg);
 }
-
 
 .scuba-6 {
-
     right: 18%;
     top: 42%;
-
-    transform:
-        rotate(-20deg);
+    transform: rotate(-20deg);
 }
-
 
 .scuba-7 {
-
     left: 2%;
     top: 65%;
-
-    transform:
-        rotate(45deg);
+    transform: rotate(45deg);
 }
 
-
 .scuba-8 {
-
     right: 2%;
     top: 68%;
-
-    transform:
-        rotate(-45deg);
+    transform: rotate(-45deg);
 }
 
 
@@ -243,12 +211,6 @@ h1 {
     z-index: 20;
 
     cursor: crosshair;
-
-    /*
-       VERY IMPORTANT:
-       Canvas is transparent.
-       It will NOT cover the GIFs.
-    */
 
     background: transparent;
 }
@@ -283,23 +245,15 @@ h1 {
 ) {
 
     h1 {
-
         margin-top: 25px;
-
     }
-
 
     .flag {
-
         width: 82vw;
-
     }
 
-
     .scuba {
-
         width: 65px;
-
     }
 
 }
@@ -313,20 +267,17 @@ h1 {
 
 
 <!-- ==========================================
-     TITLE
+     TAJUK
 ========================================== -->
 
 <h1>
-
     SELAMAT MENYAMBUT<br>
-
     HARI KEBANGSAAN KE-69
-
 </h1>
 
 
 <!-- ==========================================
-     MALAYSIA FLAG
+     JALUR GEMILANG
 ========================================== -->
 
 <img
@@ -337,7 +288,7 @@ h1 {
 
 
 <!-- ==========================================
-     SCUBA GIF 1
+     SCUBA GIF
 ========================================== -->
 
 <img
@@ -346,21 +297,11 @@ h1 {
     alt=""
 >
 
-
-<!-- ==========================================
-     SCUBA GIF 2
-========================================== -->
-
 <img
     class="scuba scuba-2"
     src="./scuba.gif"
     alt=""
 >
-
-
-<!-- ==========================================
-     SCUBA GIF 3
-========================================== -->
 
 <img
     class="scuba scuba-3"
@@ -368,21 +309,11 @@ h1 {
     alt=""
 >
 
-
-<!-- ==========================================
-     SCUBA GIF 4
-========================================== -->
-
 <img
     class="scuba scuba-4"
     src="./scuba.gif"
     alt=""
 >
-
-
-<!-- ==========================================
-     SCUBA GIF 5
-========================================== -->
 
 <img
     class="scuba scuba-5"
@@ -390,32 +321,17 @@ h1 {
     alt=""
 >
 
-
-<!-- ==========================================
-     SCUBA GIF 6
-========================================== -->
-
 <img
     class="scuba scuba-6"
     src="./scuba.gif"
     alt=""
 >
 
-
-<!-- ==========================================
-     SCUBA GIF 7
-========================================== -->
-
 <img
     class="scuba scuba-7"
     src="./scuba.gif"
     alt=""
 >
-
-
-<!-- ==========================================
-     SCUBA GIF 8
-========================================== -->
 
 <img
     class="scuba scuba-8"
@@ -429,9 +345,7 @@ h1 {
 ========================================== -->
 
 <div class="hint">
-
     🎆 Klik mana-mana untuk bunga api 🎆
-
 </div>
 
 
@@ -446,7 +360,269 @@ h1 {
 
 
 /* ==========================================
-   CANVAS SETUP
+   AUDIO SYSTEM
+========================================== */
+
+let audioContext = null;
+
+
+/*
+   Create audio context after
+   the first user click.
+*/
+
+function getAudioContext() {
+
+    if (!audioContext) {
+
+        audioContext =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+    }
+
+    return audioContext;
+}
+
+
+/* ==========================================
+   FIREWORK LAUNCH SOUND
+========================================== */
+
+function playLaunchSound() {
+
+    const audio =
+        getAudioContext();
+
+
+    const now =
+        audio.currentTime;
+
+
+    /*
+       Oscillator = rising rocket sound
+    */
+
+    const oscillator =
+        audio.createOscillator();
+
+
+    const gain =
+        audio.createGain();
+
+
+    oscillator.type =
+        "sawtooth";
+
+
+    oscillator.frequency.setValueAtTime(
+        130,
+        now
+    );
+
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+        650,
+        now + 0.35
+    );
+
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.12,
+        now + 0.05
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.4
+    );
+
+
+    oscillator.connect(
+        gain
+    );
+
+
+    gain.connect(
+        audio.destination
+    );
+
+
+    oscillator.start(
+        now
+    );
+
+
+    oscillator.stop(
+        now + 0.4
+    );
+}
+
+
+/* ==========================================
+   FIREWORK EXPLOSION SOUND
+========================================== */
+
+function playExplosionSound() {
+
+    const audio =
+        getAudioContext();
+
+
+    const now =
+        audio.currentTime;
+
+
+    /*
+       Low boom
+    */
+
+    const oscillator =
+        audio.createOscillator();
+
+
+    const gain =
+        audio.createGain();
+
+
+    oscillator.type =
+        "sine";
+
+
+    oscillator.frequency.setValueAtTime(
+        90,
+        now
+    );
+
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+        35,
+        now + 0.45
+    );
+
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.35,
+        now + 0.015
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.5
+    );
+
+
+    oscillator.connect(
+        gain
+    );
+
+
+    gain.connect(
+        audio.destination
+    );
+
+
+    oscillator.start(
+        now
+    );
+
+
+    oscillator.stop(
+        now + 0.5
+    );
+
+
+    /*
+       Crackle/noise layer
+    */
+
+    const bufferSize =
+        audio.sampleRate * 0.35;
+
+
+    const buffer =
+        audio.createBuffer(
+            1,
+            bufferSize,
+            audio.sampleRate
+        );
+
+
+    const data =
+        buffer.getChannelData(0);
+
+
+    for (
+        let i = 0;
+        i < bufferSize;
+        i++
+    ) {
+
+        data[i] =
+            Math.random() * 2 - 1;
+
+    }
+
+
+    const noise =
+        audio.createBufferSource();
+
+
+    noise.buffer =
+        buffer;
+
+
+    const noiseGain =
+        audio.createGain();
+
+
+    noiseGain.gain.setValueAtTime(
+        0.18,
+        now
+    );
+
+
+    noiseGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.35
+    );
+
+
+    noise.connect(
+        noiseGain
+    );
+
+
+    noiseGain.connect(
+        audio.destination
+    );
+
+
+    noise.start(
+        now
+    );
+
+}
+
+
+/* ==========================================
+   CANVAS
 ========================================== */
 
 const canvas =
@@ -456,7 +632,9 @@ const canvas =
 
 
 const ctx =
-    canvas.getContext("2d");
+    canvas.getContext(
+        "2d"
+    );
 
 
 let W =
@@ -480,6 +658,7 @@ function resize() {
 
     canvas.height =
         H;
+
 }
 
 
@@ -493,7 +672,7 @@ window.addEventListener(
 
 
 /* ==========================================
-   FIREWORK STORAGE
+   FIREWORK DATA
 ========================================== */
 
 const rockets = [];
@@ -546,7 +725,8 @@ class Rocket {
             colors[
                 Math.floor(
                     Math.random()
-                    * colors.length
+                    *
+                    colors.length
                 )
             ];
 
@@ -601,7 +781,7 @@ class Rocket {
     draw() {
 
         /*
-           Draw rocket trail
+           Rocket trail
         */
 
         for (
@@ -699,6 +879,13 @@ class Rocket {
     explode() {
 
         /*
+           SOUND
+        */
+
+        playExplosionSound();
+
+
+        /*
            Main explosion
         */
 
@@ -748,7 +935,7 @@ class Rocket {
 
 
         /*
-           White sparkle ring
+           White ring
         */
 
         for (
@@ -892,10 +1079,6 @@ class Particle {
         );
 
 
-        /*
-           Fade particle naturally
-        */
-
         ctx.globalAlpha =
             this.life;
 
@@ -934,9 +1117,7 @@ class Particle {
 function animate() {
 
     /*
-       IMPORTANT:
-       Clear canvas instead of painting
-       black over the GIFs.
+       Transparent canvas
     */
 
     ctx.clearRect(
@@ -952,9 +1133,7 @@ function animate() {
     );
 
 
-    /* ======================
-       ROCKETS
-    ====================== */
+    /* Rockets */
 
     for (
         let i =
@@ -989,9 +1168,7 @@ function animate() {
     }
 
 
-    /* ======================
-       PARTICLES
-    ====================== */
+    /* Particles */
 
     for (
         let i =
@@ -1037,7 +1214,7 @@ animate();
 
 
 /* ==========================================
-   CLICK → FIREWORK
+   CLICK → FIREWORK + SOUND
 ========================================== */
 
 canvas.addEventListener(
@@ -1046,15 +1223,38 @@ canvas.addEventListener(
 
     function(event) {
 
+        /*
+           Start audio
+        */
+
+        const audio =
+            getAudioContext();
+
+
+        if (
+            audio.state ===
+            "suspended"
+        ) {
+
+            audio.resume();
+
+        }
+
+
+        /*
+           Rocket sound
+        */
+
+        playLaunchSound();
+
+
+        /*
+           Target position
+        */
 
         let targetY =
             event.clientY;
 
-
-        /*
-           Don't explode too close
-           to the bottom.
-        */
 
         if (
             targetY >
@@ -1066,6 +1266,10 @@ canvas.addEventListener(
 
         }
 
+
+        /*
+           Create rocket
+        */
 
         rockets.push(
 
@@ -1088,4 +1292,4 @@ canvas.addEventListener(
 </body>
 
 </html>
-
+```
