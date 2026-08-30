@@ -278,1132 +278,311 @@ h1 {
 
 let audioContext = null;
 
-
-/* Get audio context */
-
 function getAudio() {
-
     if (!audioContext) {
-
-        audioContext =
-            new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
-
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
-
-    if (
-        audioContext.state ===
-        "suspended"
-    ) {
-
+    if (audioContext.state === "suspended") {
         audioContext.resume();
-
     }
-
     return audioContext;
 }
 
 
 /* =====================================================
-   REALISTIC FIREWORK BOOM
+   REALISTIC FIREWORK BOOM & CRACKLE (IMPROVED)
 ===================================================== */
 
 function explosionSound() {
-
-    const audio =
-        getAudio();
-
-    const now =
-        audio.currentTime;
-
+    const audio = getAudio();
+    const now = audio.currentTime;
 
     /* ---------------------------------
-       LOW FREQUENCY BOOM
+       1. DEEP SUB-BASS BOOM (Dentuman Dalam)
     --------------------------------- */
+    const subOsc = audio.createOscillator();
+    const subGain = audio.createGain();
 
-    const boom =
-        audio.createOscillator();
+    subOsc.type = "sine";
+    const baseFreq = 60 + Math.random() * 20;
+    subOsc.frequency.setValueAtTime(baseFreq, now);
+    subOsc.frequency.exponentialRampToValueAtTime(20, now + 0.8);
 
-    const boomGain =
-        audio.createGain();
+    subGain.gain.setValueAtTime(0.001, now);
+    subGain.gain.exponentialRampToValueAtTime(0.8, now + 0.02);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
 
+    subOsc.connect(subGain);
+    subGain.connect(audio.destination);
 
-    boom.type =
-        "sine";
-
-
-    const pitch =
-        45 +
-        Math.random() * 25;
-
-
-    boom.frequency.setValueAtTime(
-        pitch,
-        now
-    );
-
-
-    boom.frequency.exponentialRampToValueAtTime(
-        22,
-        now + 0.65
-    );
-
-
-    boomGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-
-    boomGain.gain.exponentialRampToValueAtTime(
-        0.7,
-        now + 0.015
-    );
-
-
-    boomGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.65
-    );
-
-
-    boom.connect(
-        boomGain
-    );
-
-    boomGain.connect(
-        audio.destination
-    );
-
-
-    boom.start(now);
-
-    boom.stop(
-        now + 0.7
-    );
-
+    subOsc.start(now);
+    subOsc.stop(now + 0.85);
 
     /* ---------------------------------
-       EXPLOSION IMPACT
+       2. MID IMPACT NOISE (Kesan Impak Udara)
     --------------------------------- */
-
-    const impact =
-        audio.createOscillator();
-
-    const impactGain =
-        audio.createGain();
-
-
-    impact.type =
-        "triangle";
-
-
-    impact.frequency.setValueAtTime(
-        110,
-        now
-    );
-
-
-    impact.frequency.exponentialRampToValueAtTime(
-        40,
-        now + 0.25
-    );
-
-
-    impactGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-
-    impactGain.gain.exponentialRampToValueAtTime(
-        0.35,
-        now + 0.01
-    );
-
-
-    impactGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.3
-    );
-
-
-    impact.connect(
-        impactGain
-    );
-
-    impactGain.connect(
-        audio.destination
-    );
-
-
-    impact.start(now);
-
-    impact.stop(
-        now + 0.35
-    );
-
-
-    /* ---------------------------------
-       CRACKLE NOISE
-    --------------------------------- */
-
-    const duration =
-        0.8;
-
-
-    const buffer =
-        audio.createBuffer(
-            1,
-            audio.sampleRate * duration,
-            audio.sampleRate
-        );
-
-
-    const data =
-        buffer.getChannelData(0);
-
-
-    /*
-       Mostly silence with random
-       short crackles.
-    */
-
-    for (
-        let i = 0;
-
-        i < data.length;
-
-        i++
-    ) {
-
-        data[i] = 0;
-
+    const noiseBuffer = audio.createBuffer(1, audio.sampleRate * 0.5, audio.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noiseBuffer.length; i++) {
+        output[i] = Math.random() * 2 - 1;
     }
 
+    const whiteNoise = audio.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
 
-    const crackleCount =
-        35 +
-        Math.floor(
-            Math.random() * 30
-        );
+    const filter = audio.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(800, now);
+    filter.frequency.exponentialRampToValueAtTime(80, now + 0.4);
 
+    const noiseGain = audio.createGain();
+    noiseGain.gain.setValueAtTime(0.001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.6, now + 0.015);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
 
-    for (
-        let i = 0;
+    whiteNoise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(audio.destination);
 
-        i < crackleCount;
+    whiteNoise.start(now);
+    whiteNoise.stop(now + 0.55);
 
-        i++
-    ) {
+    /* ---------------------------------
+       3. REALISTIC CRACKLE POPPING (Desiran Bunga Api)
+    --------------------------------- */
+    setTimeout(() => {
+        const crackleDuration = 0.6;
+        const crackleBuffer = audio.createBuffer(1, audio.sampleRate * crackleDuration, audio.sampleRate);
+        const crackleData = crackleBuffer.getChannelData(0);
 
-        const start =
-            Math.floor(
-                Math.random()
-                *
-                data.length
-            );
-
-
-        const length =
-            Math.floor(
-                audio.sampleRate
-                *
-                (
-                    0.003 +
-                    Math.random()
-                    * 0.012
-                )
-            );
-
-
-        const amplitude =
-            0.25 +
-            Math.random()
-            * 0.65;
-
-
-        for (
-            let j = 0;
-
-            j < length &&
-            start + j <
-            data.length;
-
-            j++
-        ) {
-
-            /*
-               Short noise burst
-            */
-
-            const fade =
-                1 -
-                j / length;
-
-
-            data[start + j] =
-                (
-                    Math.random()
-                    * 2 - 1
-                )
-                *
-                amplitude
-                *
-                fade;
-
+        const popCount = 20 + Math.floor(Math.random() * 25);
+        for (let i = 0; i < popCount; i++) {
+            const start = Math.floor(Math.random() * (crackleData.length - 200));
+            const popLen = Math.floor(audio.sampleRate * 0.003);
+            const amp = 0.15 + Math.random() * 0.45;
+            for (let j = 0; j < popLen; j++) {
+                crackleData[start + j] = (Math.random() * 2 - 1) * amp * (1 - j / popLen);
+            }
         }
 
-    }
+        const crackleSource = audio.createBufferSource();
+        crackleSource.buffer = crackleBuffer;
 
+        const crackleFilter = audio.createBiquadFilter();
+        crackleFilter.type = "bandpass";
+        crackleFilter.frequency.value = 2500;
+        crackleFilter.Q.value = 1.2;
 
-    const crackle =
-        audio.createBufferSource();
+        const crackleGain = audio.createGain();
+        crackleGain.gain.setValueAtTime(0.3, audio.currentTime);
+        crackleGain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + crackleDuration);
 
+        crackleSource.connect(crackleFilter);
+        crackleFilter.connect(crackleGain);
+        crackleGain.connect(audio.destination);
 
-    crackle.buffer =
-        buffer;
-
-
-    const crackleGain =
-        audio.createGain();
-
-
-    crackleGain.gain.value =
-        0.35;
-
-
-    crackle.connect(
-        crackleGain
-    );
-
-    crackleGain.connect(
-        audio.destination
-    );
-
-
-    crackle.start(
-        now
-    );
-
+        crackleSource.start();
+    }, 120);
 }
 
 
 /* =====================================================
-   ROCKET WHOOSH
+   SMOOTH ROCKET WHOOSH (IMPROVED)
 ===================================================== */
 
 function launchSound() {
+    const audio = getAudio();
+    const now = audio.currentTime;
 
-    const audio =
-        getAudio();
+    const duration = 0.45;
+    const buffer = audio.createBuffer(1, audio.sampleRate * duration, audio.sampleRate);
+    const data = buffer.getChannelData(0);
 
-    const now =
-        audio.currentTime;
-
-
-    /* ---------------------------------
-       WHOOSH OSCILLATOR
-    --------------------------------- */
-
-    const oscillator =
-        audio.createOscillator();
-
-    const gain =
-        audio.createGain();
-
-
-    oscillator.type =
-        "sawtooth";
-
-
-    const startPitch =
-        80 +
-        Math.random() * 40;
-
-
-    const endPitch =
-        500 +
-        Math.random() * 250;
-
-
-    oscillator.frequency.setValueAtTime(
-        startPitch,
-        now
-    );
-
-
-    oscillator.frequency.exponentialRampToValueAtTime(
-        endPitch,
-        now + 0.45
-    );
-
-
-    gain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.08,
-        now + 0.08
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.45
-    );
-
-
-    oscillator.connect(
-        gain
-    );
-
-    gain.connect(
-        audio.destination
-    );
-
-
-    oscillator.start(now);
-
-    oscillator.stop(
-        now + 0.45
-    );
-
-
-    /* ---------------------------------
-       AIR NOISE
-    --------------------------------- */
-
-    const buffer =
-        audio.createBuffer(
-            1,
-            audio.sampleRate * 0.45,
-            audio.sampleRate
-        );
-
-
-    const data =
-        buffer.getChannelData(0);
-
-
-    for (
-        let i = 0;
-
-        i < data.length;
-
-        i++
-    ) {
-
-        data[i] =
-            (
-                Math.random()
-                * 2 - 1
-            );
-
+    for (let i = 0; i < data.length; i++) {
+        data[i] = Math.random() * 2 - 1;
     }
 
+    const noise = audio.createBufferSource();
+    noise.buffer = buffer;
 
-    const noise =
-        audio.createBufferSource();
+    const filter = audio.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(250, now);
+    filter.frequency.exponentialRampToValueAtTime(1200, now + duration);
+    filter.Q.value = 2.0;
 
+    const gain = audio.createGain();
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.25, now + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
-    noise.buffer =
-        buffer;
-
-
-    const filter =
-        audio.createBiquadFilter();
-
-
-    filter.type =
-        "lowpass";
-
-
-    filter.frequency.setValueAtTime(
-        500,
-        now
-    );
-
-
-    filter.frequency.exponentialRampToValueAtTime(
-        2500,
-        now + 0.4
-    );
-
-
-    const noiseGain =
-        audio.createGain();
-
-
-    noiseGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-
-    noiseGain.gain.exponentialRampToValueAtTime(
-        0.05,
-        now + 0.1
-    );
-
-
-    noiseGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.45
-    );
-
-
-    noise
-        .connect(filter)
-        .connect(noiseGain)
-        .connect(audio.destination);
-
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(audio.destination);
 
     noise.start(now);
-
 }
 
 
 /* =====================================================
-   CANVAS
+   CANVAS & ANIMATION ENGINE
 ===================================================== */
 
-const canvas =
-    document.getElementById(
-        "fireworks"
-    );
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
 
-
-const ctx =
-    canvas.getContext(
-        "2d"
-    );
-
-
-let W =
-    window.innerWidth;
-
-
-let H =
-    window.innerHeight;
-
+let W = window.innerWidth;
+let H = window.innerHeight;
 
 function resize() {
-
-    W =
-        window.innerWidth;
-
-    H =
-        window.innerHeight;
-
-    canvas.width =
-        W;
-
-    canvas.height =
-        H;
-
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
 }
-
 
 resize();
-
-
-window.addEventListener(
-    "resize",
-    resize
-);
-
-
-/* =====================================================
-   FIREWORK DATA
-===================================================== */
+window.addEventListener("resize", resize);
 
 const rockets = [];
-
 const particles = [];
-
-
-const colors = [
-
-    "#ff0000",
-    "#ffffff",
-    "#ffd700",
-    "#0066ff",
-    "#ff4d6d",
-    "#66b7ff"
-
-];
-
-
-/* =====================================================
-   ROCKET
-===================================================== */
+const colors = ["#ff0000", "#ffffff", "#ffd700", "#0066ff", "#ff4d6d", "#66b7ff"];
 
 class Rocket {
-
-    constructor(
-        x,
-        targetY
-    ) {
-
-        this.x =
-            x;
-
-        this.y =
-            H + 20;
-
-        this.targetY =
-            targetY;
-
-        this.speed =
-            7 +
-            Math.random() * 3;
-
-        this.color =
-            colors[
-                Math.floor(
-                    Math.random()
-                    *
-                    colors.length
-                )
-            ];
-
+    constructor(x, targetY) {
+        this.x = x;
+        this.y = H + 20;
+        this.targetY = targetY;
+        this.speed = 7 + Math.random() * 3;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
         this.trail = [];
-
     }
-
 
     update() {
-
-        this.trail.push({
-
-            x: this.x,
-
-            y: this.y
-
-        });
-
-
-        if (
-            this.trail.length > 12
-        ) {
-
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > 12) {
             this.trail.shift();
-
         }
 
+        this.y -= this.speed;
 
-        this.y -=
-            this.speed;
-
-
-        if (
-            this.y <=
-            this.targetY
-        ) {
-
+        if (this.y <= this.targetY) {
             this.explode();
-
             return true;
-
         }
-
-
         return false;
-
     }
 
-
     draw() {
-
-        for (
-            let i = 0;
-
-            i < this.trail.length;
-
-            i++
-        ) {
-
-            const point =
-                this.trail[i];
-
-
-            const alpha =
-                i /
-                this.trail.length;
-
+        for (let i = 0; i < this.trail.length; i++) {
+            const point = this.trail[i];
+            const alpha = i / this.trail.length;
 
             ctx.beginPath();
-
-
-            ctx.arc(
-
-                point.x,
-
-                point.y,
-
-                1.5,
-
-                0,
-
-                Math.PI * 2
-
-            );
-
-
-            ctx.fillStyle =
-                `rgba(
-                    255,
-                    255,
-                    255,
-                    ${alpha}
-                )`;
-
-
+            ctx.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.fill();
-
         }
 
-
         ctx.beginPath();
-
-
-        ctx.arc(
-
-            this.x,
-
-            this.y,
-
-            3,
-
-            0,
-
-            Math.PI * 2
-
-        );
-
-
-        ctx.fillStyle =
-            this.color;
-
-
-        ctx.shadowBlur =
-            20;
-
-
-        ctx.shadowColor =
-            this.color;
-
-
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = this.color;
         ctx.fill();
-
-
-        ctx.shadowBlur =
-            0;
-
+        ctx.shadowBlur = 0;
     }
-
 
     explode() {
-
-        /*
-           Play boom
-        */
-
         explosionSound();
 
-
-        /*
-           Main explosion
-        */
-
-        for (
-            let i = 0;
-
-            i < 140;
-
-            i++
-        ) {
-
-            const angle =
-                Math.random()
-                *
-                Math.PI
-                *
-                2;
-
-
-            const speed =
-                2 +
-                Math.random() * 7;
-
-
-            particles.push(
-
-                new Particle(
-
-                    this.x,
-
-                    this.y,
-
-                    Math.cos(angle)
-                    * speed,
-
-                    Math.sin(angle)
-                    * speed,
-
-                    this.color
-
-                )
-
-            );
-
+        for (let i = 0; i < 140; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 2 + Math.random() * 7;
+            particles.push(new Particle(this.x, this.y, Math.cos(angle) * speed, Math.sin(angle) * speed, this.color));
         }
 
-
-        /*
-           White sparkle ring
-        */
-
-        for (
-            let i = 0;
-
-            i < 45;
-
-            i++
-        ) {
-
-            const angle =
-                Math.PI
-                *
-                2
-                *
-                i
-                /
-                45;
-
-
-            particles.push(
-
-                new Particle(
-
-                    this.x,
-
-                    this.y,
-
-                    Math.cos(angle)
-                    * 5,
-
-                    Math.sin(angle)
-                    * 5,
-
-                    "#ffffff"
-
-                )
-
-            );
-
+        for (let i = 0; i < 45; i++) {
+            const angle = (Math.PI * 2 * i) / 45;
+            particles.push(new Particle(this.x, this.y, Math.cos(angle) * 5, Math.sin(angle) * 5, "#ffffff"));
         }
-
     }
-
 }
-
-
-/* =====================================================
-   PARTICLE
-===================================================== */
 
 class Particle {
-
-    constructor(
-        x,
-        y,
-        vx,
-        vy,
-        color
-    ) {
-
-        this.x =
-            x;
-
-        this.y =
-            y;
-
-        this.vx =
-            vx;
-
-        this.vy =
-            vy;
-
-        this.color =
-            color;
-
-        this.life =
-            1;
-
-        this.size =
-            1 +
-            Math.random() * 2;
-
-        this.gravity =
-            0.065;
-
+    constructor(x, y, vx, vy, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.color = color;
+        this.life = 1;
+        this.size = 1 + Math.random() * 2;
+        this.gravity = 0.065;
     }
-
 
     update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= 0.985;
+        this.vy *= 0.985;
+        this.vy += this.gravity;
+        this.life -= 0.012;
 
-        this.x +=
-            this.vx;
-
-
-        this.y +=
-            this.vy;
-
-
-        this.vx *=
-            0.985;
-
-
-        this.vy *=
-            0.985;
-
-
-        this.vy +=
-            this.gravity;
-
-
-        this.life -=
-            0.012;
-
-
-        return (
-            this.life <= 0
-        );
-
+        return this.life <= 0;
     }
-
 
     draw() {
-
         ctx.beginPath();
-
-
-        ctx.arc(
-
-            this.x,
-
-            this.y,
-
-            this.size,
-
-            0,
-
-            Math.PI * 2
-
-        );
-
-
-        ctx.globalAlpha =
-            this.life;
-
-
-        ctx.fillStyle =
-            this.color;
-
-
-        ctx.shadowBlur =
-            15;
-
-
-        ctx.shadowColor =
-            this.color;
-
-
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.globalAlpha = this.life;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
         ctx.fill();
-
-
-        ctx.globalAlpha =
-            1;
-
-
-        ctx.shadowBlur =
-            0;
-
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
     }
-
 }
-
-
-/* =====================================================
-   ANIMATION
-===================================================== */
 
 function animate() {
+    ctx.clearRect(0, 0, W, H);
 
-    /*
-       Transparent canvas.
-    */
-
-    ctx.clearRect(
-
-        0,
-
-        0,
-
-        W,
-
-        H
-
-    );
-
-
-    /* Rockets */
-
-    for (
-        let i =
-            rockets.length - 1;
-
-        i >= 0;
-
-        i--
-    ) {
-
-        const finished =
-            rockets[i].update();
-
-
+    for (let i = rockets.length - 1; i >= 0; i--) {
+        const finished = rockets[i].update();
         rockets[i].draw();
-
-
-        if (
-            finished
-        ) {
-
-            rockets.splice(
-                i,
-                1
-            );
-
+        if (finished) {
+            rockets.splice(i, 1);
         }
-
     }
 
-
-    /* Particles */
-
-    for (
-        let i =
-            particles.length - 1;
-
-        i >= 0;
-
-        i--
-    ) {
-
-        const dead =
-            particles[i].update();
-
-
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const dead = particles[i].update();
         particles[i].draw();
-
-
-        if (
-            dead
-        ) {
-
-            particles.splice(
-                i,
-                1
-            );
-
+        if (dead) {
+            particles.splice(i, 1);
         }
-
     }
 
-
-    requestAnimationFrame(
-        animate
-    );
-
+    requestAnimationFrame(animate);
 }
-
 
 animate();
 
+canvas.addEventListener("click", function(event) {
+    getAudio();
+    launchSound();
 
-/* =====================================================
-   CLICK
-===================================================== */
-
-canvas.addEventListener(
-
-    "click",
-
-    function(event) {
-
-        /*
-           Start browser audio.
-        */
-
-        getAudio();
-
-
-        /*
-           Rocket whoosh.
-        */
-
-        launchSound();
-
-
-        /*
-           Firework target.
-        */
-
-        let targetY =
-            event.clientY;
-
-
-        if (
-            targetY >
-            H - 100
-        ) {
-
-            targetY =
-                H - 100;
-
-        }
-
-
-        /*
-           Create rocket.
-        */
-
-        rockets.push(
-
-            new Rocket(
-
-                event.clientX,
-
-                targetY
-
-            )
-
-        );
-
+    let targetY = event.clientY;
+    if (targetY > H - 100) {
+        targetY = H - 100;
     }
 
-);
+    rockets.push(new Rocket(event.clientX, targetY));
+});
 
 </script>
 
 </body>
 
 </html>
-
